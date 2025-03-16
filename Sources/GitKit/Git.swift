@@ -19,7 +19,7 @@ public final class Git: Shell {
         case commit(message: String, Bool = false)
         case config(name: String, value: String)
         case clone(url: String, dirName: String? = nil)
-        case checkout(branch: String, new: Bool = false)
+        case checkout(branch: String, create: Bool = false)
         case log(numberOfCommits: Int? = nil, options: [String]? = nil, revisions: String? = nil)
         case push(remote: String? = nil, branch: String? = nil)
         case pull(remote: String? = nil, branch: String? = nil, rebase: Bool = false)
@@ -60,11 +60,12 @@ public final class Git: Shell {
                 if let dirName = dirname {
                     params.append(dirName)
                 }
-            case .checkout(let branch, let new):
-                params = [Command.checkout.rawValue, branch]
-                if new {
+            case .checkout(let branch, let create):
+                params = [Command.checkout.rawValue]
+                if create {
                     params.append("-b")
                 }
+                params.append(branch)
             case .log(let numberOfCommits, let options, let revisions):
                 params = [Command.log.rawValue]
                 if let numberOfCommits = numberOfCommits {
