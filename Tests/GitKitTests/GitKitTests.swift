@@ -49,7 +49,7 @@ final class GitKitTests: XCTestCase {
         try self.clean(path: path)
         let expectedOutput = expectation
         let git = Git(path: path)
-        try git.run(.raw("init && git commit -m 'initial' --allow-empty"))
+        try git.run(.raw("init && git commit -m 'initial' --allow-empty --no-gpg-sign"))
         let output = try git.run(alias)
         self.assert(type: "output", result: output, expected: expectedOutput)
         try self.clean(path: path)
@@ -73,8 +73,8 @@ final class GitKitTests: XCTestCase {
         try self.clean(path: path)
         let git = Git(path: path)
         try git.run(.cmd(.initialize))
-        try git.run(.commit(message: expectation, true))
-        let out = try git.run(.log(1))
+        try git.run(.commit(message: expectation, allowEmpty: true))
+        let out = try git.run(.log(numberOfCommits: 1))
         try self.clean(path: path)
         XCTAssertTrue(out.hasSuffix(expectation), "Commit was not created.")
     }
@@ -133,7 +133,7 @@ final class GitKitTests: XCTestCase {
             """
         
         let git = Git(path: path)
-        try git.run(.raw("init && git commit -m 'initial' --allow-empty"))
+        try git.run(.raw("init && git commit -m 'initial' --allow-empty --no-gpg-sign"))
         
         let expectation = XCTestExpectation(description: "Shell command finished.")
         git.run(.cmd(.status)) { result, error in
