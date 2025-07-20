@@ -26,6 +26,7 @@ final class GitKitTests: XCTestCase {
         ("testCommandWithArgs", testCommandWithArgs),
         ("testClone", testClone),
         ("testCheckoutRemoteTracking", testCheckoutRemoteTracking),
+        ("testRevParse", testRevParse),
     ]
     
     // MARK: - helpers
@@ -117,6 +118,14 @@ final class GitKitTests: XCTestCase {
 
         try self.clean(path: path)
         let git = Git(path: path)
+        
+        // Initialize a repository and make an initial commit
+        try git.run(.raw("init"))
+        try git.run(.commit(message: "initial commit", true))
+        
+        // Test 1: Get abbreviated reference name for HEAD
+        let abbrevRef = try git.run(.revParse(abbrevRef: true, revision: "HEAD"))
+        XCTAssertEqual(abbrevRef, "main", "Should return abbreviated reference name")
 
         try git.run(.clone(url: "https://github.com/binarybirds/shell-kit.git", dirName: "MyCustomDirectory"))
         let statusOutput = try git.run("cd \(path)/MyCustomDirectory && git status")
@@ -141,6 +150,37 @@ final class GitKitTests: XCTestCase {
 
         XCTAssertTrue(branchOutput.contains("feature-branch"), "New branch should be created")
         XCTAssertTrue(branchOutput.contains("origin/main"), "Branch should track origin/main")
+    }
+
+    func testRevParse() throws {
+        let path = self.currentPath()
+        
+        try self.clean(path: path)
+        let git = Git(path: path)
+        
+        // Initialize a repository and make an initial commit
+        try git.run(.raw("init"))
+        try git.run(.commit(message: "initial commit", true))
+        
+        // Test 1: Get abbreviated reference name for HEAD
+        let abbrevRef = try git.run(.revParse(abbrevRef: true, revision: "HEAD"))
+        XCTAssertEqual(abbrevRef, "main", "Should return abbreviated reference name")
+
+        // Test 2: Get full commit SHA for HEAD
+        let fullSHA = try git.run(.revParse(abbrevRef: false, revision: "HEAD"))
+        XCTAssertTrue(fullSHA.count == 40, "Should return full 40-character SHA")
+        XCTAssertTrue(fullSHA.allSatisfy { $0.isHexDigit }, "SHA should contain only hex characters")
+        
+        // Test 3: Parse symbolic reference (@)
+        let symbolicRef = try git.run(.revParse(abbrevRef: false, revision: "@"))
+        XCTAssertEqual(symbolicRef, fullSHA, "Symbolic '@' should resolve to same SHA as HEAD")
+        
+        // Test 4: Get abbreviated reference for current branch
+        let currentBranch = try git.run(.revParse(abbrevRef: true, revision: "@"))
+        XCTAssertEqual(currentBranch, "main", "Should return current branch name")
+
+        // Clean up
+        try self.clean(path: path)
     }
 
     #if os(macOS)
