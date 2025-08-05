@@ -44,7 +44,7 @@ public final class Git: Shell {
         /// - parameter revision the name of the revision to parse. can be symbolic (`@`), human-readable (`origin/HEAD`) or a commit SHA hash
         case revParse(abbrevRef: Bool, revision: String)
 
-        case revList(branch: String, count: Bool = false, revisions: String? = nil)
+        case revList(count: Bool = false, revisions: String? = nil)
         case raw(String)
         case lsRemote(url: String, limitToHeads: Bool = false)
 
@@ -168,7 +168,7 @@ public final class Git: Shell {
                     params.append("--abbrev-ref")
                 }
                 params.append(revision)
-            case .revList(_, let count, let revisions):
+            case .revList(let count, let revisions):
                 params = [Command.revList.rawValue]
                 if count {
                     params.append("--count")
