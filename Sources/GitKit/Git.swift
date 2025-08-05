@@ -16,6 +16,7 @@ public final class Git: Shell {
         case cmd(Command, String? = nil)
         case addAll
         case status(short: Bool = false)
+        case clone(url: String , dirName: String? = nil)
         case commit(message: String, allowEmpty: Bool = false, gpgSigned: Bool = false)
         case writeConfig(name: String, value: String)
         case readConfig(name: String)
@@ -69,7 +70,8 @@ public final class Git: Shell {
                 }
                 if gpgSigned {
                     params.append("--gpg-sign")
-                } else {
+                }
+                else {
                     params.append("--no-gpg-sign")
                 }
             case .clone(let url, let dirname):
@@ -166,7 +168,7 @@ public final class Git: Shell {
                     params.append("--abbrev-ref")
                 }
                 params.append(revision)
-            case .revList(let branch, let count, let revisions):
+            case .revList(_, let count, let revisions):
                 params = [Command.revList.rawValue]
                 if count {
                     params.append("--count")

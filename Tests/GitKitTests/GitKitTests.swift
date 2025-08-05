@@ -106,6 +106,7 @@ final class GitKitTests: XCTestCase {
         self.assert(type: "output", result: statusOutput, expected: expectation)
     }
 
+
     func testCloneWithDirectory() throws {
         let path = self.currentPath()
 
